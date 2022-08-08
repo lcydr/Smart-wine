@@ -5,45 +5,61 @@
         <el-form-item label="商品类型搜索">
           <Input ref="ipt"></Input>
         </el-form-item>
-        <el-form-item>
-          <Button
-            category="select"
-            icon="el-icon-search"
-            @click.native="btnSearch"
-            >查询</Button
-          >
+        <el-form-item @click.native="btnSearch">
+          <Button category="select" icon="el-icon-search">查询</Button>
         </el-form-item>
       </el-form>
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="dialogVisible = true"
+          >新建</Button
+        >
       </div>
       <div class="bable">
-        <Tables :goodsList="goodsList" @btnChange="btnChange" @btnDel="btnDel">
-        </Tables>
-        <el-dialog
-          style="border-radius: 20px"
-          title="商品类型名称"
-          :visible.sync="dialogVisible"
-          width="50%"
+        <Tables
+          :goodsList="goodsList"
+          @btnChange="btnChange"
+          @btnDel="btnDel"
+          :text="text"
         >
-          商品类型名称:
-          <el-input
-            type="text"
-            placeholder="请输入内容"
-            v-model="text"
-            maxlength="10"
-            show-word-limit
-            style="width: 500px"
-          ></el-input>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogVisible = false"
-              >确 定</el-button
-            >
-          </span>
-        </el-dialog>
+        </Tables>
+
+        <Pagination
+          :totalCount="totalCount"
+          :pages="pages"
+          :totalPage="totalPage"
+          @goodsList="goodsList"
+          Events="goodsList"
+          @lastPage="lastPage"
+          @nextPage="nextPage"
+        ></Pagination>
+        <el-form :model="form" ref="form" :rules="rules">
+          <el-dialog
+            style="border-radius: 20px"
+            :title="type"
+            :visible.sync="dialogVisible"
+            width="40%"
+          >
+            商品类型名称:
+            <el-input
+              type="text"
+              prop="text"
+              placeholder="请输入内容"
+              v-model="text"
+              maxlength="10"
+              show-word-limit
+              style="width: 500px"
+            ></el-input>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="btnAdd">确 定</el-button>
+            </span>
+          </el-dialog>
+        </el-form>
       </div>
     </div>
   </div>
@@ -53,54 +69,132 @@
 import Button from "./compoents/Button/index.vue";
 import Input from "./compoents/Input/index.vue";
 import Tables from "./compoents/Table/index.vue";
-import { getGoodsList, changeType, DelType } from "@/api/goods";
+import Pagination from "./compoents/Pagination/index.vue";
+import { getGoodsList, addGoodsType, changeType, DelType } from "@/api/goods";
 export default {
   name: "Approvals",
   data() {
     return {
       formInline: {},
       taskInfoList: [],
-      // pageIndex: 1,
-      // totalCount: 0,
-      // totalPage: "", //全部页数
-      // pages: "", //当前页数，
+      pageIndex: 1,
+      totalCount: 0,
+      totalPage: "", //全部页数
+      pages: "", //当前页数，
       goodsList: [],
       dialogVisible: false,
+      goodsType: true,
       text: "",
+      value: "",
+      form: {
+        text: "",
+      },
+      rules: {
+        text: [
+          { required: true, message: "请输入商品类型名称", trigger: "blur" },
+        ],
+      },
     };
   },
   components: {
     Button,
     Input,
     Tables,
+    Pagination,
   },
   created() {
     this.getGoods();
   },
+  computed: {
+    type() {
+      return this.goodsType ? "新增商品类型" : "修改商品类型";
+    },
+  },
   mounted() {},
   methods: {
+    // 获取商品数据
     async getGoods() {
       const res = await getGoodsList();
       // console.log(res);
+      this.pages = res.pageIndex;
+      this.totalPage = res.totalPage;
+      // console.log(this.pages);
+      // console.log(this.totalPage);
+      this.totalCount = Number(res.totalCount);
       this.goodsList = res.currentPageRecords;
       // console.log(this.goodsList);
     },
-    async btnSearch(val) {
-      console.log(2355);
-      this.$refs.ipt.val;
-      // const res = await getGoodsList();
-      console.log(res);
+    // 搜索商品类型
+    async btnSearch(className) {
+      // 输入框有值
+      if (this.$refs.ipt.value) {
+        this.goodsList.className = className;
+        // console.log(this.goodsList.className);
+        const res = await getGoodsList({ className: this.$refs.ipt.value });
+        // console.log(res);
+        this.goodsList = res.currentPageRecords;
+        // console.log(this.goodsList);
+      } else {
+        this.$message("请输入内容");
+        this.getGoods();
+      }
     },
-    btnChange() {
+    // 新建商品类型
+    async btnAdd() {
+      // console.log(this.text);
+      await this.$refs.form.validate();
+      if (this.goodsType) {
+        // console.log(this.$refs.form.text)
+        try {
+          const res = await addGoodsType(this.text);
+          // console.log(res);
+          this.getGoods();
+          this.dialogVisible = false;
+          this.form.text = "";
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        const res = await changeType(this.text, this.classId);
+        console.log(res);
+        this.$message.success("编辑成功");
+        this.getGoods();
+        this.dialogVisible = false;
+        this.form.text = "";
+        this.goodsType = true;
+      }
+    },
+    // 修改商品类型
+    btnChange(val) {
+      this.text = val.className;
+      this.classId = val.classId;
       this.dialogVisible = true;
+      this.goodsType = false;
+      // console.log(val);
     },
-    async btnDel() {
-      // console.log(23456455);
-      // console.log(this.goodsList);
-      await DelType(this.goodsList.classId);
+    // 删除商品类型
+    async btnDel(id) {
+      await DelType(id);
       this.$message.success("删除成功");
       this.getGoods();
     },
+    // 上一页
+    // lastPage() {
+    //   if (this.pageIndex > 1) {
+    //     this.pageIndex--;
+    //     return this.getGoods();
+    //   }
+    //   this.pageIndex = 1;
+    //   this.$message.warning("已经是第一页了");
+    // },
+    // // 下一页
+    // nextPage() {
+    //   if (this.pageIndex < this.goodsList.totalPage) {
+    //     this.pageIndex++;
+    //     return this.getGoods();
+    //   }
+    //   this.$message.warning("已经是最后一页了");
+    // },
   },
 };
 </script>

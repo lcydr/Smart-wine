@@ -35,3 +35,15 @@ export function getUserWorkload (data) {
     params: data
   })
 }
+
+/**
+ * 
+ * @param {*} data 获取用户基本信息
+ * @returns 
+ */
+export function getUserInfo (data) {
+  return request({
+    url: '/api/user-service/user/' + data,
+    params: data
+  })
+}

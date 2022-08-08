@@ -61,14 +61,6 @@ export default {
       return (this.pageIndex - 1) * 10 + index + 1;
     },
     see(id) {
-      this.$alert("这是一段内容", "标题名称", {
-        callback: (action) => {
-          this.$message({
-            type: "info",
-            message: `action: ${action}`,
-          });
-        },
-      });
       console.log(id);
     },
   },

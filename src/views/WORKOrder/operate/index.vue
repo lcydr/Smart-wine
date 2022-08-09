@@ -38,7 +38,7 @@ import { taskInfo } from "@/api";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import InputSelect from "@/components/InputSelect";
-import Tables from "@/components/Tables";
+import Tables from "../components/tables.vue";
 import Pagination from "@/components/Pagination";
 export default {
   name: "Approvals",

@@ -25,7 +25,14 @@
       <el-table-column prop="createTime" label="创建日期" width="240">
       </el-table-column>
       <el-table-column label="操作" width="140">
-        <span style="color: #5f84ff">修改</span>
+        <template slot-scope="scope">
+          <el-button
+            style="color: #5f84ff"
+            @click.native="btnChange(scope.row)"
+            type="text"
+            >修改</el-button
+          >
+        </template>
       </el-table-column>
     </el-table>
   </div>
@@ -62,6 +69,10 @@ export default {
     indexChange(index) {
       // console.log(index, "index");
       return (this.pageIndex - 1) * 10 + index + 1;
+    },
+    btnChange(val) {
+      // console.log(val);
+      this.$emit("btnChange", val);
     },
   },
 };

@@ -3,11 +3,16 @@
     <div class="title">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="设备编号">
-          <Input></Input>
+          <Input ref="inputSearch" @keydown.enter.native="searchVm"></Input>
         </el-form-item>
 
         <el-form-item>
-          <Button category="select" icon="el-icon-search">查询</Button>
+          <Button
+            category="select"
+            icon="el-icon-search"
+            @click.native="searchVm"
+            >查询</Button
+          >
         </el-form-item>
       </el-form>
     </div>
@@ -31,7 +36,6 @@
 import { getEquipment } from "@/api";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import InputSelect from "@/components/InputSelect";
 import Tables from "./components/stateTables.vue";
 import Pagination from "@/components/Pagination";
 export default {
@@ -49,7 +53,6 @@ export default {
   components: {
     Button,
     Input,
-    InputSelect,
     Tables,
     Pagination,
   },
@@ -58,14 +61,40 @@ export default {
   },
   mounted() {},
   methods: {
+    // 获取表格信息
     async getEquipment(pages) {
       this.pages = pages;
       const res = await getEquipment({ pageIndex: pages, pageSize: 10 });
-      console.log(res);
+      // console.log(res);
       this.pageIndex = res.pageIndex;
       this.totalPage = res.totalPage;
       this.totalCount = Number(res.totalCount);
       this.taskInfoList = res.currentPageRecords;
+    },
+    // 搜索设备
+    async searchVm() {
+      try {
+        if (this.$refs.inputSearch.input.trim().length === 0) {
+          // console.log(123);
+          this.getEquipment();
+          this.$refs.inputSearch.input = "";
+        } else {
+          const value = this.$refs.inputSearch.input;
+          // console.log(this.pageIndex);
+          const res = await getEquipment({
+            // pageIndex: this.pages,
+            pageSize: 10,
+            innerCode: value,
+          });
+          this.$refs.inputSearch.input = "";
+          this.pageIndex = this.pageIndex;
+          this.totalPage = res.totalPage;
+          this.totalCount = Number(res.totalCount);
+          this.taskInfoList = res.currentPageRecords;
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 };

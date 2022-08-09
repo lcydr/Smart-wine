@@ -18,10 +18,16 @@
           icon="el-icon-circle-plus-outline"
           >新建</Button
         >
-        <Button category="configuration">导入数据</Button>
+        <Button category="configuration" @click.native="ImportData"
+          >导入数据</Button
+        >
       </div>
       <div class="bable">
-        <Tables :list="list" :pageIndex="pageIndex"></Tables>
+        <Tables
+          :list="list"
+          :pageIndex="pageIndex"
+          @btnChange="btnChange"
+        ></Tables>
 
         <Pagination
           :totalCount="totalCount"
@@ -30,36 +36,63 @@
           @getGood="getGood"
           Events="getGood"
         ></Pagination>
-
-        <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
-          <el-form ref="form" label-width="100px">
-            <el-form-item label="商品名称">
-              <el-input maxlength="10" show-word-limit></el-input>
+        <!-- 新增/修改弹窗 -->
+        <el-dialog
+          :title="changeTitle"
+          :visible.sync="dialogVisible"
+          width="30%"
+        >
+          <el-form
+            ref="formData"
+            :model="formData"
+            :rules="rules"
+            label-width="100px"
+          >
+            <el-form-item label="商品名称" prop="skuName">
+              <el-input
+                maxlength="10"
+                v-model="formData.skuName"
+                show-word-limit
+              ></el-input>
             </el-form-item>
-            <el-form-item label="品牌">
-              <el-input maxlength="10" show-word-limit></el-input>
+            <el-form-item label="品牌" prop="brandName">
+              <el-input
+                maxlength="10"
+                show-word-limit
+                v-model="formData.brandName"
+              ></el-input>
             </el-form-item>
-            <template>
-              <el-form-item label="商品价格(元)">
-                <el-input-number
-                  v-model="num"
-                  controls-position="right"
-                  :min="0"
-                  :max="10"
-                  :step="0.5"
-                  style="width: 100%"
-                ></el-input-number>
-              </el-form-item>
-            </template>
-            <el-form-item label="商品类型">
-              <el-select placeholder="请选择活动区域" style="width: 100%">
-                <el-option label="区域一" value="shanghai"></el-option>
+            <el-form-item label="商品价格(元)" prop="price">
+              <el-input-number
+                v-model="formData.price"
+                controls-position="right"
+                :min="0"
+                :step="0.5"
+                style="width: 100%"
+              ></el-input-number>
+            </el-form-item>
+            <el-form-item label="商品类型" prop="classId">
+              <el-select
+                placeholder="请选择商品类型"
+                v-model="formData.classId"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in typeList"
+                  :key="item.classId"
+                  :label="item.className"
+                  :value="item.classId"
+                ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="规格">
-              <el-input maxlength="10" show-word-limit></el-input>
+            <el-form-item label="规格" prop="unit">
+              <el-input
+                maxlength="10"
+                v-model="formData.unit"
+                show-word-limit
+              ></el-input>
             </el-form-item>
-            <el-form-item label="商品图片">
+            <el-form-item label="商品图片" prop="skuImage">
               <el-upload
                 class="avatar-uploader"
                 action="https://jsonplaceholder.typicode.com/posts/"
@@ -67,18 +100,60 @@
                 :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload"
               >
-                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <img
+                  v-if="formData.skuImage"
+                  :src="formData.skuImage"
+                  class="avatar"
+                />
                 <i v-else class="el-icon-upload avatar-uploader-icon"></i>
               </el-upload>
+              <div class="text" style="color: #bac0cd">
+                支持扩展名：jpg、png，文件不得大于100kb
+              </div>
             </el-form-item>
           </el-form>
 
           <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogVisible = false"
-              >确 定</el-button
-            >
+            <el-button @click="close">取 消</el-button>
+            <el-button type="primary" @click.native="addGoods">确 定</el-button>
           </span>
+        </el-dialog>
+
+        <!-- 导入数据 -->
+        <el-dialog title="导入数据" :visible.sync="dialogVisible2" width="30%">
+          <el-form>
+            <el-form-item label="标题" style="margin-left: 100px">
+              <el-upload
+                class="upload-demo"
+                ref="upload"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :on-preview="handlePreview2"
+                :on-remove="handleRemove2"
+                :file-list="fileList"
+                :auto-upload="false"
+              >
+                <el-button
+                  slot="trigger"
+                  size="small"
+                  type="primary"
+                  @click="submitUpload"
+                  style="font-size: 14px; color: #fff"
+                >
+                  <i class="el-icon-upload2"></i>
+                  选取文件</el-button
+                >
+                <div slot="tip" class="el-upload__tip">
+                  支持扩展名：xls、xlsx，文件不得大于1M
+                </div>
+              </el-upload>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible2 = false">取 消</el-button>
+                <el-button type="primary" @click="dialogVisible2 = false"
+                  >确 定</el-button
+                >
+              </span>
+            </el-form-item>
+          </el-form>
         </el-dialog>
       </div>
     </div>
@@ -86,7 +161,13 @@
 </template>
 
 <script>
-import { getList } from "@/api/goods";
+import {
+  getList,
+  getGoodsList,
+  addGoods,
+  Picture,
+  changeGoods,
+} from "@/api/goods";
 import Button from "./compoents/Button/index.vue";
 import Input from "./compoents/Input/index.vue";
 import Tables from "./compoents/Table/index.vue";
@@ -103,8 +184,36 @@ export default {
       list: [],
       value: "",
       dialogVisible: false,
+      dialogVisible2: false,
       num: "",
       imageUrl: "",
+      fileList: [],
+      addChange: true,
+      formData: {
+        skuImage: "",
+        unit: "",
+        classId: "",
+        price: "",
+        brandName: "",
+        skuName: "",
+        skuId: "",
+      }, // 新增数据
+      rules: {
+        // 表单校验
+        skuImage: [{ required: true, message: "请选择图片", trigger: "blur" }],
+        unit: [{ required: true, message: "请输入商品规格", trigger: "blur" }],
+        classId: [
+          { required: true, message: "请选择商品类型", trigger: "blur" },
+        ],
+        price: [{ required: true, message: "请输入商品价格", trigger: "blur" }],
+        brandName: [
+          { required: true, message: "请输入品牌名称", trigger: "blur" },
+        ],
+        skuName: [
+          { required: true, message: "请输入商品名称", trigger: "blur" },
+        ],
+      },
+      typeList: [],
     };
   },
   components: {
@@ -115,6 +224,12 @@ export default {
   },
   created() {
     this.getGood();
+    this.getGoodsList();
+  },
+  computed: {
+    changeTitle() {
+      return this.addChange ? "新增商品 " : "修改商品";
+    },
   },
   mounted() {},
   methods: {
@@ -145,20 +260,110 @@ export default {
         // this.getGoods();
       }
     },
-    handleAvatarSuccess(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
+    // 图片上传
+    async handleAvatarSuccess(reg, file) {
+      // console.log(reg);
+      // console.log(file);
+      const formData = new FormData();
+      formData.append("fileName", file.raw); //
+
+      const res = await Picture(formData);
+      // console.log(res);
+      this.formData.skuImage = res;
     },
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg";
+      const isPNG = file.type === "image/png";
       const isLt2M = file.size / 1024 / 1024 < 2;
 
-      if (!isJPG) {
-        this.$message.error("上传头像图片只能是 JPG 格式!");
+      // if (!isJPG) {
+      //   this.$message.error("上传头像图片只能是 JPG 格式!");
+      // }
+      // if (!isLt2M) {
+      //   this.$message.error("上传头像图片大小不能超过 2MB!");
+      // }
+      return (isJPG && isLt2M) || (isPNG && isLt2M);
+    },
+    // 添加商品
+    async addGoods() {
+      // console.log(this.formData);
+      await this.$refs.formData.validate();
+      if (this.addChange) {
+        const res = await addGoods(this.formData);
+        // console.log(res);
+        this.$message.success("添加成功");
+        this.getGood();
+        this.dialogVisible = false;
+        this.formData = {
+          skuImage: "",
+          unit: "",
+          classId: "",
+          price: "",
+          brandName: "",
+          skuName: "",
+        };
+      } else {
+        console.log(34534);
+        const res = await changeGoods(this.formData, this.formData.skuId);
+        this.$message.success("编辑成功");
+        this.getGood();
+        this.dialogVisible = false;
+        this.formData = {
+          skuImage: "",
+          unit: "",
+          classId: "",
+          price: "",
+          brandName: "",
+          skuName: "",
+        };
+        this.addChange = true;
       }
-      if (!isLt2M) {
-        this.$message.error("上传头像图片大小不能超过 2MB!");
-      }
-      return isJPG && isLt2M;
+    },
+    // 修改商品
+    btnChange(val) {
+      console.log(val);
+      this.formData.skuImage = val.skuImage;
+      this.formData.unit = val.unit;
+      this.formData.classId = val.classId;
+      this.formData.price = val.price;
+      this.formData.brandName = val.brandName;
+      this.formData.skuName = val.skuName;
+      this.formData.skuId = val.skuId;
+      this.dialogVisible = true;
+      this.addChange = false;
+    },
+    // 获取商品类型
+    async getGoodsList() {
+      const res = await getGoodsList();
+      // console.log(res);
+      this.typeList = res.currentPageRecords;
+      // console.log(this.typeList);
+    },
+    // 关闭弹框
+    close() {
+      this.dialogVisible = false;
+      this.addChange = true;
+      this.formData = {
+        skuImage: "",
+        unit: "",
+        classId: "",
+        price: "",
+        brandName: "",
+        skuName: "",
+      };
+    },
+    // 导入数据
+    ImportData() {
+      this.dialogVisible2 = true;
+    },
+    submitUpload() {
+      this.$refs.upload.submit();
+    },
+    handleRemove2(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePreview2(file) {
+      console.log(file);
     },
   },
 };
@@ -228,9 +433,19 @@ export default {
   line-height: 84px;
   text-align: center;
 }
-.avatar {
-  width: 178px;
-  height: 178px;
+/deep/.avatar {
+  width: 90px;
+  height: 90px;
   display: block;
+}
+/deep/.el-dialog__footer {
+  text-align: center;
+}
+
+/deep/.el-button--small {
+  background-color: #5f84ff;
+  width: 220px;
+  height: 36px;
+  text-align: center;
 }
 </style>

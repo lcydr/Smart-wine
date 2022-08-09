@@ -15,8 +15,21 @@
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
-        <Button category="configuration">工单配置</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="dialogVisible = true"
+          >新建</Button
+        >
+        <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+          <span>这是一段信息</span>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogVisible = false"
+              >确 定</el-button
+            >
+          </span>
+        </el-dialog>
       </div>
       <div class="bable">
         <Tables :taskInfoList="taskInfoList" :pageIndex="pageIndex"></Tables>
@@ -38,7 +51,7 @@ import { taskInfo } from "@/api";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import InputSelect from "@/components/InputSelect";
-import Tables from "@/components/Tables";
+import Tables from "../components/tables.vue";
 import Pagination from "@/components/Pagination";
 export default {
   name: "Approvals",
@@ -50,6 +63,7 @@ export default {
       totalCount: 0,
       totalPage: "", //全部页数
       pages: "", //当前页数
+      dialogVisible: false,
     };
   },
   components: {

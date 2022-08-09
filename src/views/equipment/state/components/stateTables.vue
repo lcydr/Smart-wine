@@ -45,17 +45,28 @@
         </template>
       </el-table-column>
     </el-table>
+    <Dialog
+      dialogTitle="设备详情"
+      :isShow="false"
+      :dialogVisible="dialogVisible"
+      @closeDialog="closeDialog"
+      ref="Dialog"
+    >
+    </Dialog>
   </div>
 </template>
 
 <script>
-import * as moment from "moment";
+import Dialog from "./Dialog.vue";
 export default {
   data() {
-    return {};
+    return {
+      dialogVisible: false,
+    };
   },
-  created() {
-    // console.log(this.totalCount);
+  created() {},
+  components: {
+    Dialog,
   },
   props: {
     taskInfoList: {
@@ -85,9 +96,23 @@ export default {
       // console.log(index, "index");
       return (this.pageIndex - 1) * 10 + index + 1;
     },
+    // 打开弹窗获取信息
     stateDetails(info) {
-      console.log(info);
-      console.log(info.type.typeId);
+      this.dialogVisible = true;
+      // 获取一段时间内的销售总数
+      this.$refs.Dialog.getOrderCount(info.innerCode);
+      // 获取一定时间范围之内的收入
+      this.$refs.Dialog.getOrderAmount(info.innerCode);
+      // 获取售货机补货次数
+      this.$refs.Dialog.getSupplyCount(info.innerCode);
+      // 获取售货机维修次数
+      this.$refs.Dialog.getRepairCount(info.innerCode);
+      // 获取售货机商品销量
+      this.$refs.Dialog.getSkuCollect(info.innerCode);
+    },
+    // 关闭弹窗
+    closeDialog(val) {
+      this.dialogVisible = val;
     },
   },
 };

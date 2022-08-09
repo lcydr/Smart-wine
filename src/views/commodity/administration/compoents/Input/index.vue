@@ -1,5 +1,5 @@
 <template>
-  <el-input v-model="input" :placeholder="placeholder" class="inputs">
+  <el-input v-model="value" :placeholder="placeholder" class="inputs">
   </el-input>
 </template>
 
@@ -7,7 +7,7 @@
 export default {
   data() {
     return {
-      input: "",
+      value: "",
     };
   },
   props: {

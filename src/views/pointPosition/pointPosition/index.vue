@@ -19,10 +19,26 @@
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="addbtn"
+          >新建</Button
+        >
+        <!-- 新增弹框 -->
+        <addlist
+          v-if="isshow"
+          :arealist="arealist"
+          :hezuolist="hezuolist"
+          :isshow.sync="isshow"
+        />
       </div>
       <div class="bable">
-        <Tables :taskInfoList="taskInfoList" :pageIndex="pageIndex"></Tables>
+        <Tables
+          :taskInfoList="taskInfoList"
+          :arealist="arealist"
+          :pageIndex="pageIndex"
+        ></Tables>
 
         <Pagination
           v-show="zzz"
@@ -40,7 +56,9 @@
 </template>
 
 <script>
-import { getPointlist1 } from "@/api";
+import { getPointlist1, getPartnerlist } from "@/api";
+import addlist from "./components/addlist.vue";
+import popup from "./components/pop-up.vue";
 import Button from "./components/Button/index.vue";
 import Input from "@/components/Input";
 import InputSelect from "./components/InputSelect/index.vue";
@@ -50,8 +68,10 @@ export default {
   name: "Approvals",
   data() {
     return {
+      isshow: false,
       formInline: {},
       taskInfoList: [],
+      hezuolist: [],
       pageIndex: 1,
       totalCount: 0,
       totalPage: "", //全部页数
@@ -66,9 +86,12 @@ export default {
     InputSelect,
     Tables,
     Pagination,
+    popup,
+    addlist,
   },
   created() {
     this.getPointlist1();
+    this.getPartnerlist();
   },
   mounted() {
     // console.log(this.$refs.searchlist);
@@ -79,7 +102,6 @@ export default {
       this.pageIndex = pageIndex;
       const res = await getPointlist1({ pageIndex: pageIndex });
       this.taskInfoList = res.currentPageRecords;
-
       //全部条数
       this.totalCount = Number(res.totalCount);
       //当前页
@@ -89,6 +111,7 @@ export default {
       this.totalPage = res.totalPage;
       //截取地址
       this.taskInfoList.forEach((item) => {
+        item.addr1 = item.addr.slice(0, 11);
         item.addr = item.addr.slice(12);
       });
       res.currentPageRecords.forEach((item) => {
@@ -96,6 +119,13 @@ export default {
       });
       // this.arealist = [...new Set(this.arealist)];
       // console.log(this.arealist);
+    },
+    //合作商搜索
+    async getPartnerlist(pageIndex) {
+      this.pageIndex = pageIndex;
+      const res = await getPartnerlist({ pageIndex: pageIndex, pageSize: 10 });
+      this.hezuolist = res.currentPageRecords;
+      // console.log(this.hezuolist);
     },
     //搜索
     async search() {
@@ -117,6 +147,11 @@ export default {
     //查看详情
     showedit() {
       console.log(111);
+    },
+    //新增
+    addbtn() {
+      this.isshow = true;
+      // console.log('111');
     },
   },
 };

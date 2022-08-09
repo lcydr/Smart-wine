@@ -3,21 +3,34 @@
     <div class="title">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="区域搜索">
-          <Input></Input>
+          <Input ref="taskInfoList"></Input>
         </el-form-item>
         <el-form-item>
-          <Button category="select" icon="el-icon-search"></Button>
+          <Button
+            category="select"
+            icon="el-icon-search"
+            @click.native="search"
+          ></Button>
         </el-form-item>
       </el-form>
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="xinjian"
+          @getArealist="getArealist"
+          >新建</Button
+        >
       </div>
+      <!-- 新建弹窗 -->
+      <pushlist v-if="isshow" :isshow.sync="isshow" />
       <div class="bable">
         <Tables :taskInfoList="taskInfoList" :pageIndex="pageIndex"></Tables>
 
         <Pagination
+          v-if="zzz"
           :totalCount="totalCount"
           :pages="pages"
           :totalPage="totalPage"
@@ -31,11 +44,12 @@
 
 <script>
 import Button from "@/components/Button";
+import pushlist from "./components/pushlist.vue";
 import Input from "@/components/Input";
 import InputSelect from "./components/InputSelect.vue";
 import Tables from "./components/tables.vue";
 import Pagination from "@/components/Pagination";
-import { getArealist } from "@/api";
+import { getArealist, pushxinzeng } from "@/api";
 export default {
   name: "Approvals",
   data() {
@@ -46,6 +60,8 @@ export default {
       totalPage: "", //全部页数
       pages: "", //当前页数
       taskInfoList: [],
+      zzz: true,
+      isshow: false,
     };
   },
   components: {
@@ -54,12 +70,29 @@ export default {
     InputSelect,
     Tables,
     Pagination,
+    pushlist,
   },
   created() {
     this.getArealist();
   },
   mounted() {},
   methods: {
+    //查询
+    async search() {
+      const res = await getArealist({
+        name: this.$refs.taskInfoList.input || null,
+        // regionId: this.$refs.taskInfoList.select || null,
+      });
+      this.taskInfoList = res.currentPageRecords;
+      if (
+        this.$refs.taskInfoList.input.length === 0
+      ) {
+        this.getArealist();
+        this.zzz = true;
+      } else {
+        this.zzz = false;
+      }
+    },
     async getArealist(pageIndex) {
       this.pageIndex = pageIndex;
       const res = await getArealist({ pageIndex: pageIndex, pageSize: 10 });
@@ -69,6 +102,9 @@ export default {
       // console.log(this.pages);
       this.totalCount = Number(res.totalCount); //全部条数
       this.totalPage = res.totalPage; //全部页数
+    },
+    xinjian() {
+      this.isshow = true;
     },
   },
 };

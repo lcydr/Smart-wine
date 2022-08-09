@@ -3,3 +3,4 @@ export * from "./taskInfo";
 export * from "./equipment";
 export * from './pointPosition.js'
 export * from './workorder'
+export * from './order'

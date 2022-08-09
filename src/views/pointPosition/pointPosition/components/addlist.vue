@@ -1,7 +1,7 @@
 <template>
   <el-dialog title="新增点位" :visible="isshow" width="30%" @close="onclose">
     <el-form
-      :model="ruleForm"
+      :model="vmCount"
       :rules="rules"
       ref="ruleForm"
       label-width="100px"
@@ -16,7 +16,7 @@
             v-for="(item, index) in arealist"
             :key="index"
             :label="item.remark"
-            :value="item.remark"
+            :value="item"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -26,7 +26,7 @@
             v-for="item in diqu"
             :key="item.id"
             :label="item.name"
-            :value="item.name"
+            :value="item"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -36,7 +36,7 @@
             v-for="item in hezuolist"
             :key="item.id"
             :label="item.name"
-            :value="item.name"
+            :value="item"
           ></el-option>
         </el-select>
       </el-form-item>
@@ -61,6 +61,7 @@
   </el-dialog>
 </template>
 <script>
+// import store from "@/store/modules/user";
 import { getbusinessdistrict, postnewlist } from "@/api";
 import { regionData, CodeToText } from "element-china-area-data";
 
@@ -74,6 +75,7 @@ export default {
         name: "", //点位名称
         region: "", //所在区域
         diqu: "", //所属区域
+        diquId: "",
         desc: "", //介绍
         hezuo: "", //合作
       },
@@ -95,6 +97,7 @@ export default {
       },
     };
   },
+
   props: {
     isshow: {
       type: Boolean,
@@ -108,6 +111,9 @@ export default {
       type: Array,
       required: true,
     },
+    taskInfoList: {
+      type: Array,
+    },
   },
   created() {
     this.getbusinessdistrict();
@@ -117,15 +123,28 @@ export default {
       this.$emit("update:isshow", false);
     },
     async adddesp() {
-      //   console.log(this.options);
-      this.ruleForm.dizhi = this.addtions.name;
-      //   this.onclose();
-      //   await postnewlist({});
+      // console.log(this.ruleForm.diquId);
+      // console.log(this.addtions);
+
+      // console.log(this.ruleForm);
+      await postnewlist({
+        name: this.ruleForm.name,
+        addr: this.addtions[0] + "-" + this.ruleForm.desc,
+        areaCode: this.addtions[1],
+        createUserId: 1,
+        // createUserId: this.$store.state.user.userId,
+
+        regionId: this.ruleForm.region.id,
+        businessId: this.ruleForm.diqu.id,
+        ownerId: this.ruleForm.hezuo.id,
+        ownerName: this.ruleForm.hezuo.name,
+      });
+      this.onclose();
+      this.$parent.getPointlist1()
     },
     async getbusinessdistrict() {
       const res = await getbusinessdistrict();
       this.diqu = res;
-      //   console.log(this.diqu);
     },
     handleChange(value) {
       //我们选择地址后，selectedOptions 会保存对应的区域码，例如北京的区域码为'110000'
@@ -133,9 +152,8 @@ export default {
       this.addtions.selectedOptions = value;
       var name = "";
       this.selectedOptions.map((item) => (name += CodeToText[item] + "/"));
-      this.addtions.name = name;
-      // console.log(this.addtions.names);
-      // console.log(this.addtions);
+      this.addtions = [name, value[value.length - 1]];
+      console.log(this.addtions.names);
     },
   },
 };

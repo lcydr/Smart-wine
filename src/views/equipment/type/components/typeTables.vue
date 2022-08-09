@@ -24,26 +24,46 @@
       <el-table-column prop="channelMaxCapacity" label="设备容量" width="200">
       </el-table-column>
       <el-table-column label="操作" width="200">
-        <template>
-          <el-button type="text" size="small">修改</el-button>
-          <el-button type="text" size="small" style="color: red"
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="editVmType(scope.row)"
+            >修改</el-button
+          >
+          <el-button
+            type="text"
+            size="small"
+            style="color: red"
+            @click="delVmType(scope.row)"
             >删除</el-button
           >
         </template>
       </el-table-column>
     </el-table>
+    <EditDialog
+      dialogTitle="修改新增类型"
+      :dialogVisible="dialogVisible"
+      v-if="dialogVisible"
+      @closeDialog="closeDialog"
+      :isShow="true"
+      :editVmTypeObj="editVmTypeObj"
+      @getvmType="getvmType"
+    ></EditDialog>
   </div>
 </template>
 
 <script>
-import * as moment from "moment";
+import EditDialog from "./editDialog.vue";
+import { getvmTypeCurrent } from "@/api";
 export default {
   data() {
-    return {};
+    return {
+      dialogVisible: false,
+      editVmTypeObj: {},
+    };
   },
   created() {
     // console.log(this.totalCount);
   },
+  components: { EditDialog },
   props: {
     taskInfoList: {
       type: Array,
@@ -61,6 +81,25 @@ export default {
     indexChange(index) {
       // console.log(index, "index");
       return (this.pageIndex - 1) * 10 + index + 1;
+    },
+    // 删除
+    delVmType(val) {
+      this.$emit("delVmType", val);
+    },
+    // 修改弹框
+    async editVmType(val) {
+      // console.log(val);
+      const res = await getvmTypeCurrent(val.typeId);
+      // console.log(res);
+      this.editVmTypeObj = res;
+      this.dialogVisible = true;
+    },
+    // 关闭弹窗
+    closeDialog(val) {
+      this.dialogVisible = val;
+    },
+    getvmType() {
+      this.$emit("getvmType");
     },
   },
 };

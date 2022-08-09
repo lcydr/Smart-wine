@@ -31,6 +31,7 @@
           :arealist="arealist"
           :hezuolist="hezuolist"
           :isshow.sync="isshow"
+          :taskInfoList="taskInfoList"
         />
       </div>
       <div class="bable">
@@ -101,6 +102,7 @@ export default {
     async getPointlist1(pageIndex) {
       this.pageIndex = pageIndex;
       const res = await getPointlist1({ pageIndex: pageIndex });
+      // console.log(res);
       this.taskInfoList = res.currentPageRecords;
       //全部条数
       this.totalCount = Number(res.totalCount);
@@ -124,6 +126,7 @@ export default {
     async getPartnerlist(pageIndex) {
       this.pageIndex = pageIndex;
       const res = await getPartnerlist({ pageIndex: pageIndex, pageSize: 10 });
+      // console.log(res);
       this.hezuolist = res.currentPageRecords;
       // console.log(this.hezuolist);
     },

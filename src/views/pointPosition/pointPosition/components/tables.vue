@@ -72,7 +72,7 @@
     <!-- 修改弹框 -->
     <popup
       v-if="isshow"
-      :isshow="isshow"
+      :isshow.sync="isshow"
       :Detailslist="Detailslist"
       :shujuxuanran="shujuxuanran"
       :arealist="arealist"
@@ -147,14 +147,7 @@ export default {
     },
     //修改
     async Revise(val) {
-      // const obj = this.taskInfoList.find(
-      //   (item) => item.region.name === val.region.name
-      // );
-      // console.log(obj.region.id);
-      // console.log(val);
-      const res = await getRegionalDetails(val.businessId);
-      // console.log(res);
-      // console.log(res.node);
+      // console.log(res );
       this.shujuxuanran = val;
       this.$nextTick(() => {
         this.isshow = true;

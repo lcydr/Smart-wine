@@ -3,22 +3,32 @@
     <div class="title">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="合作商搜索">
-          <Input></Input>
+          <Input ref="taskInfoList"></Input>
         </el-form-item>
 
         <el-form-item>
-          <Button category="select" icon="el-icon-search"></Button>
+          <Button
+            category="select"
+            icon="el-icon-search"
+            @click.native="search"
+          ></Button>
         </el-form-item>
       </el-form>
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="xinjian"
+          >新建</Button
+        >
       </div>
       <div class="bable">
         <Tables :taskInfoList="taskInfoList" :pageIndex="pageIndex"></Tables>
 
         <Pagination
+          v-if="zzz"
           :totalCount="totalCount"
           :pages="pages"
           :totalPage="totalPage"
@@ -27,6 +37,7 @@
         ></Pagination>
       </div>
     </div>
+    <xinjian :dialogVisible.sync="dialogVisible"/>
   </div>
 </template>
 
@@ -37,6 +48,7 @@ import Input from "@/components/Input";
 import InputSelect from "@/components/InputSelect";
 import Tables from "./components/tables.vue";
 import Pagination from "@/components/Pagination";
+import xinjian from "./components/xinjian.vue";
 export default {
   name: "Approvals",
   data() {
@@ -47,6 +59,8 @@ export default {
       totalCount: 0,
       totalPage: "", //全部页数
       pages: "", //当前页数
+      zzz: true,
+      dialogVisible : false,
     };
   },
   components: {
@@ -55,6 +69,7 @@ export default {
     InputSelect,
     Tables,
     Pagination,
+    xinjian,
   },
   created() {
     this.getPartnerlist();
@@ -70,8 +85,24 @@ export default {
       this.pages = res.pageIndex;
       this.totalPage = res.totalPage;
       this.taskInfoList.forEach((item) => {
-        item.ratio = item.ratio + "%";
+        item.ratio = item.ratio;
       });
+    },
+    async search() {
+      const res = await getPartnerlist({
+        name: this.$refs.taskInfoList.input || null,
+        // regionId: this.$refs.taskInfoList.select || null,
+      });
+      this.taskInfoList = res.currentPageRecords;
+      if (this.$refs.taskInfoList.input.length === 0) {
+        this.zzz = true;
+      } else {
+        this.zzz = false;
+      }
+    },
+    //新建
+    xinjian() {
+      this.dialogVisible=true;
     },
   },
 };

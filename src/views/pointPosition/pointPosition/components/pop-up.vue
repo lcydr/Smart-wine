@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="提示" :visible="isshow" width="30%">
+  <el-dialog title="提示" :visible="isshow" width="30%" @close="onClose">
     <div style="margin: 20px"></div>
     <el-form
       :model="ruleForm"
@@ -16,8 +16,8 @@
           show-word-limit
         ></el-input>
       </el-form-item>
-      <!-- 所属商圈 -->
-      <el-form-item label="所属商圈" label-width="100px" prop="region">
+      <!-- 所在区域 -->
+      <el-form-item label="所在区域" label-width="100px" prop="region">
         <el-select
           v-model="ruleForm.region"
           placeholder="请选择活动区域"
@@ -25,35 +25,37 @@
           size="medium"
         >
           <el-option
-            v-for="item in districtlist"
+            v-for="item in quyu"
             :key="item.id"
             :label="item.name"
             :value="item.name"
           ></el-option>
         </el-select>
       </el-form-item>
-      <!-- 所在区域 -->
-      <el-form-item label="所在区域">
-        <el-select
-          v-model="ruleForm.region.remark"
-          placeholder="请选择活动区域"
-          size="medium"
-        >
+      <!-- 所属商圈 -->
+      <el-form-item label="所属商圈">
+        <el-select v-model="value" placeholder="请选择活动区域" size="medium">
           <el-option
+            v-for="item in diqu"
+            :key="item.id"
             :label="item.name"
-            :value="item.name"
-            v-for="(item, index) in arealist"
-            :key="index"
+            :value="item"
           ></el-option>
         </el-select>
       </el-form-item>
       <!-- 合作商 -->
       <el-form-item label="归属合作商" prop="region">
         <el-select
-          v-model="ruleForm.ownerName"
+          v-model="ruleForm.name"
           placeholder="请选择活动区域"
           size="medium"
         >
+          <el-option
+            v-for="item in getfanfan"
+            :key="item.id"
+            :label="item.name"
+            :value="item"
+          ></el-option>
         </el-select>
       </el-form-item>
       <!-- //地址 -->
@@ -72,7 +74,7 @@
         <el-input
           :rows="4"
           placeholder="请输入内容"
-          v-model="ruleForm.addr"
+          v-model="ruleForm.desc"
           maxlength="60"
           show-word-limit
         >
@@ -80,7 +82,7 @@
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
-      <el-button>取 消</el-button>
+      <el-button @click="onClose">取 消</el-button>
       <el-button type="primary" @click="tijiao">确 定</el-button>
     </span>
     <span slot="footer" class="dialog-footer"> </span>
@@ -88,28 +90,32 @@
 </template>
 <script>
 import { regionData, CodeToText } from "element-china-area-data";
-import { getbusinessdistrict, getPartnerlist, postRevise } from "@/api";
+
+import {
+  getbusinessdistrict,
+  getPartnerlist,
+  postRevise,
+  getArealist,
+} from "@/api";
 export default {
   name: "pop",
   data() {
     return {
       options: regionData,
       selectedOptions: [],
-      addtions: {}, //存储地址数据
+      addtions: [], //存储地址数据
       textarea: "", //文本框值
+      diqu: [], //商圈
+      quyu: [], //区域
+      getfanfan: [],
+      value: "1",
       ruleForm: {
         name: "", //点位名称
-        region: "", //商圈
-        quyu: "", //区域
-        ownerName: "", //合作商
-        addr1: "", //地址
-        addr: "", //介绍
-        id: "",
-        areaCode: "",
-        businessId: "",
-        ownerId: "",
-        createUserId: "",
-        regionId: "",
+        region: "", //所在区域
+        businessType: "", //所属区域
+        diquId: "",
+        desc: "", //介绍
+        hezuo: "", //合作
       },
 
       //商圈列表
@@ -122,7 +128,6 @@ export default {
         region: [
           { required: true, message: "请选择活动区域", trigger: "change" },
         ],
-        addtions: [{ required: true, message: "请选择区域", trigger: "blur" }],
       },
     };
   },
@@ -130,8 +135,8 @@ export default {
     this.getbusinessdistrict();
     this.ruleForm = this.shujuxuanran;
     // console.log(this.ruleForm);
-    this.selectedOptions = this.shujuxuanran.addr1;
-    console.log(this.shujuxuanran);
+    this.getArealist();
+    this.getPartnerlist();
   },
   mounted() {},
   props: {
@@ -152,9 +157,22 @@ export default {
     },
   },
   methods: {
-    async getPartnerlist() {
-      const res = await getPartnerlist();
+    onClose() {
+      this.$emit("update:isshow", false);
+    },
+    async getArealist() {
+      const res = await getArealist({ pageIndex: 1, pageSize: 50 });
+      // console.log(res);
+      this.quyu = res.currentPageRecords;
+    },
+    async getbusinessdistrict() {
+      const res = await getbusinessdistrict();
+      this.diqu = res;
       console.log(res);
+    },
+    async getPartnerlist() {
+      const res = await getPartnerlist({ pageIndex: 1, pageSize: 50 });
+      this.getfanfan = res.currentPageRecords;
     },
     handleChange(value) {
       //我们选择地址后，selectedOptions 会保存对应的区域码，例如北京的区域码为'110000'
@@ -162,33 +180,34 @@ export default {
       this.addtions.selectedOptions = value;
       var name = "";
       this.selectedOptions.map((item) => (name += CodeToText[item] + "/"));
-      this.addtions.name = name;
-      // console.log(this.addtions.names);
-      // console.log(this.addtions);
+      this.addtions = [name, value[value.length - 1]];
+      console.log(this.addtions);
     },
-    //获取商圈列表
-    async getbusinessdistrict() {
-      const res = await getbusinessdistrict();
-      // console.log(res);
-      this.districtlist = res;
-    },
+
     //修改数据
     async tijiao() {
-      // console.log();
-      const res = await postRevise( this.shujuxuanran.id,{
-        addr: this.addtions.name,
-        areaCode: 0,
-        businessId: this.ruleForm.businessId,
-        createUserId: this.ruleForm.createUserId,
-        name: this.ruleForm.name,
-        ownerId: this.ruleForm.ownerId,
-        ownerName: this.ruleForm.ownerName,
-        regionId: this.ruleForm.regionId,
-      });
-      // this.ruleForm.id,
-      // this.ruleForm
-
-      console.log(res);
+      console.log(this.shujuxuanran);
+      try {
+        const res = await postRevise(
+          {
+            name: this.ruleForm.name,
+            addr: this.addtions[0] + "-" + this.ruleForm.addr1,
+            areaCode: this.addtions[1],
+            // createUserId: 1,
+            createUserId: this.$store.state.user.userId,
+            regionId: this.ruleForm.regionId,
+            businessId: this.ruleForm.businessId,
+            ownerId: this.ruleForm.ownerId,
+            ownerName: this.ruleForm.ownerName,
+          },
+          this.ruleForm.id
+        );
+        this.$success.message("修改成功");
+        this.$parent.isshow = false;
+        this.onClose();
+      } catch (error) {
+        this.$success.error("修改失败");
+      }
       this.dialogVisible = true;
     },
   },

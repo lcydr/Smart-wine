@@ -11,11 +11,16 @@
       <el-table-column prop="className" label="商品类型名称" width="860">
       </el-table-column>
       <el-table-column label="操作" width="120">
-        <span
-          ><el-button @click.native="btnChange" type="text">修改</el-button>
-          <el-button @click.native="btnDel(id)" type="text" style="color: red"
+        <template slot-scope="scope"
+          ><el-button @click.native="btnChange(scope.row)" type="text"
+            >修改</el-button
+          >
+          <el-button
+            @click.native="btnDel(scope.row.classId)"
+            type="text"
+            style="color: red"
             >删除</el-button
-          ></span
+          ></template
         >
       </el-table-column>
     </el-table>
@@ -40,6 +45,10 @@ export default {
       type: Number,
       default: 1,
     },
+    text: {
+      type: String,
+      required: true,
+    },
   },
   created() {},
   components: {
@@ -51,14 +60,14 @@ export default {
       // console.log(index, "index");
       return (this.pageIndex - 1) * 10 + index + 1;
     },
-    btnChange() {
-      this.$emit("btnChange");
+    // 修改商品类型
+    btnChange(val) {
+      // console.log(this.goodsList);
+      this.$emit("btnChange", val);
+      // console.log(val);
     },
-    btnDel() {
-      console.log(this.goodsList);
-      const id = this.goodsList.classId;
-      console.log(id);
-      // this.$emit("btnDel");
+    btnDel(classId) {
+      this.$emit("btnDel", classId);
     },
   },
 };

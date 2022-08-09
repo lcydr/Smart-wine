@@ -32,10 +32,8 @@
           :totalCount="totalCount"
           :pages="pages"
           :totalPage="totalPage"
-          @goodsList="goodsList"
-          Events="goodsList"
-          @lastPage="lastPage"
-          @nextPage="nextPage"
+          Events="getGoods"
+          @getGoods="getGoods"
         ></Pagination>
         <el-form :model="form" ref="form" :rules="rules">
           <el-dialog
@@ -113,7 +111,8 @@ export default {
   mounted() {},
   methods: {
     // 获取商品数据
-    async getGoods() {
+    async getGoods(pageIndex) {
+      this.pageIndex = pageIndex;
       const res = await getGoodsList();
       // console.log(res);
       this.pages = res.pageIndex;

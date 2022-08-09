@@ -27,7 +27,8 @@
           :totalCount="totalCount"
           :pages="pages"
           :totalPage="totalPage"
-          Events="getTaskInfo"
+          @getGood="getGood"
+          Events="getGood"
         ></Pagination>
 
         <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
@@ -51,24 +52,25 @@
               </el-form-item>
             </template>
             <el-form-item label="商品类型">
-              <el-select placeholder="请选择活动区域">
+              <el-select placeholder="请选择活动区域" style="width: 100%">
                 <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="规格">
               <el-input maxlength="10" show-word-limit></el-input>
             </el-form-item>
-            <el-upload
-              class="avatar-uploader"
-              action="https://jsonplaceholder.typicode.com/posts/"
-              :show-file-list="false"
-              :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload"
-            >
-              <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-            </el-upload>
+            <el-form-item label="商品图片">
+              <el-upload
+                class="avatar-uploader"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+              >
+                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <i v-else class="el-icon-upload avatar-uploader-icon"></i>
+              </el-upload>
+            </el-form-item>
           </el-form>
 
           <span slot="footer" class="dialog-footer">
@@ -101,7 +103,7 @@ export default {
       list: [],
       value: "",
       dialogVisible: false,
-      num: 0.5,
+      num: "",
       imageUrl: "",
     };
   },
@@ -117,7 +119,8 @@ export default {
   mounted() {},
   methods: {
     // 商品信息
-    async getGood() {
+    async getGood(pageIndex) {
+      this.pageIndex = pageIndex;
       const res = await getList();
       // console.log(res);
       this.pages = res.pageIndex;

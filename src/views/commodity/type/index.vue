@@ -147,6 +147,7 @@ export default {
         try {
           const res = await addGoodsType(this.text);
           // console.log(res);
+          this.$message.success("添加成功");
           this.getGoods();
           this.dialogVisible = false;
           this.form.text = "";
@@ -155,7 +156,7 @@ export default {
         }
       } else {
         const res = await changeType(this.text, this.classId);
-        console.log(res);
+        // console.log(res);
         this.$message.success("编辑成功");
         this.getGoods();
         this.dialogVisible = false;

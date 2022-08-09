@@ -38,9 +38,7 @@
       </el-table-column>
       <el-table-column label="操作" width="120">
         <template>
-          <el-button type="text" @click="dialogVisible = true">
-            <view-details
-          /></el-button>
+          <el-button type="text" size="small">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -48,14 +46,8 @@
 </template>
 
 <script>
-import ViewDetails from "@/views/WORKOrder/operate/components/view-details.vue";
-import Recreate from "../../WORKOrder/operate/components/Recreate.vue";
 import * as moment from "moment";
 export default {
-  components: {
-    ViewDetails,
-    Recreate,
-  },
   data() {
     return {};
   },

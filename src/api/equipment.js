@@ -167,3 +167,89 @@ export function putVmType(data) {
     data,
   });
 }
+
+/**
+ * 点位搜索（获取点位信息）
+ * @param {Object} data
+ * @returns Promise
+ */
+export function getNode(data) {
+  return request({
+    url: "/api/vm-service/node/search",
+    params: data,
+  });
+}
+
+/**
+ * 新增售货机
+ * @param {Object} data 新增售货机所需参数
+ * @returns Promise
+ */
+export function postVm(data) {
+  return request({
+    url: "/api/vm-service/vm",
+    method: "POST",
+    data,
+  });
+}
+
+/**
+ * 查询售货机策略
+ * @param {String} id 设备编号
+ * @returns Promise
+ */
+export function getVmPolicy(id) {
+  return request({
+    url: "/api/vm-service/policy/vmPolicy/" + id,
+  });
+}
+
+/**
+ * 新增策略
+ * @param {Object} data 新增策略所需数据
+ * @returns Promise
+ */
+export function postPolicy(data) {
+  return request({
+    url: "/api/vm-service/policy",
+    data,
+  });
+}
+
+/**
+ * 取消策略
+ * @param {Object} data 取消策略所需参数
+ * @returns Promise
+ */
+export function putCancelPolicy(data) {
+  return request({
+    url:
+      "/api/vm-service/vm/cancelPolicy/" + data.innerCode + "/" + data.policyId,
+    method: "PUT",
+  });
+}
+
+/**
+ * 应用策略
+ * @param {Object} data 应用策略所需参数
+ * @returns Promise
+ */
+export function putApplyPolicy(data) {
+  return request({
+    url: "/api/vm-service/vm/applyPolicy",
+    method: "PUT",
+    data,
+  });
+}
+
+/**
+ * 修改售货机点位
+ * @param {Object} data 修改售货机点位参数
+ * @returns Promise
+ */
+export function putVmNode(data) {
+  return request({
+    url: "/api/vm-service/vm/" + data.id + "/" + data.nodeId,
+    method: "PUT",
+  });
+}

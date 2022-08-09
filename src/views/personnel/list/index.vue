@@ -12,10 +12,20 @@
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="visible = true"
+          >新建</Button
+        >
       </div>
       <div class="bable">
-        <Tables :taskInfoList="taskInfoList" :pageIndex="pageIndex"></Tables>
+        <Tables
+          :taskInfoList="taskInfoList"
+          :pageIndex="pageIndex"
+          @remove="remove"
+          @modifyUser="getTaskInfo"
+        ></Tables>
 
         <Pagination
           :totalCount="totalCount"
@@ -26,17 +36,20 @@
         ></Pagination>
       </div>
     </div>
+    <!-- 弹窗 -->
+    <Dialog :visible="visible" @isSHOW="isShow" @addUser="removes"></Dialog>
   </div>
 </template>
 
 <script>
 // import { taskInfo } from "@/api";
 // 人员列表
-import { getPersonnelList } from "@/api/personnel";
+import { getPersonnelList, delPersonnel } from "@/api/personnel";
 import Button from "./components/list-button.vue";
 import Input from "./components/list-input.vue";
 import Tables from "./components/list-text.vue";
 import Pagination from "@/components/Pagination";
+import Dialog from "./components/list-dialog.vue";
 export default {
   name: "Approvals",
   data() {
@@ -48,6 +61,9 @@ export default {
       totalPage: "", //全部页数
       pages: "", //当前页数
       inputData: "",
+      visible: false,
+      ModifyData: [],
+      // isAaa: true,
     };
   },
   components: {
@@ -55,6 +71,7 @@ export default {
     Input,
     Tables,
     Pagination,
+    Dialog,
   },
   created() {
     this.getTaskInfo();
@@ -63,13 +80,14 @@ export default {
   methods: {
     // 人员列表
     async getTaskInfo(pageIndex) {
+      console.log(2222);
       this.pageIndex = pageIndex;
       // console.log(this.pageIndex);
       const res = await getPersonnelList({
         pageIndex: pageIndex,
         pageSize: 10,
       });
-      // console.log(res);
+      console.log(res);
       this.pages = res.pageIndex;
       this.totalPage = res.totalPage;
       // console.log(this.pages);
@@ -96,6 +114,30 @@ export default {
         this.totalCount = Number(res.totalCount);
         this.taskInfoList = res.currentPageRecords;
       }
+    },
+    // 删除
+    async remove(id) {
+      try {
+        await this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        });
+        await delPersonnel(id.id);
+        this.$message.success("删除成功");
+        this.getTaskInfo();
+      } catch (error) {
+        // this.$message.error("删除失败");
+      }
+    },
+    isShow(val) {
+      this.visible = val;
+    },
+    async removes() {
+      const res = await getPersonnelList({
+        pageSize: 999,
+      });
+      console.log(res);
     },
   },
   computed: {},

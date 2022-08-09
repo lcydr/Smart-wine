@@ -118,7 +118,6 @@ export default {
       this.details = res;
       // console.log(this.details);
 
-      // 年
       //获取当天到23.59.59时间
       let yy = new Date().getFullYear();
       let mm = new Date().getMonth() + 1;
@@ -175,6 +174,7 @@ export default {
       this.gettime3 =
         yy3 + "-0" + mm3 + "-0" + dd3 + " 0" + hh3 + ":0" + mf3 + ":0" + ss3;
       // console.log(this.gettime3);
+
       const ressss = await getUserWorkload({
         userId: id,
         start: this.gettime3,

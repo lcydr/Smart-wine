@@ -111,6 +111,12 @@ export function changeGoods(data) {
     data,
   });
 }
+
+/**
+ * 数据导入
+ * @param {*} fileName
+ * @returns
+ */
 export function importData(fileName) {
   return request({
     url: "/api/vm-service/sku/upload",

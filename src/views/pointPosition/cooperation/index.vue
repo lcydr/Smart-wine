@@ -70,7 +70,7 @@ export default {
       this.pages = res.pageIndex;
       this.totalPage = res.totalPage;
       this.taskInfoList.forEach((item) => {
-        item.ratio = item.ratio+'%';
+        item.ratio = item.ratio + "%";
       });
     },
   },

@@ -32,11 +32,42 @@ export function getPartnerlist(data) {
 }
 /**
  * 获取区域详情
- * @param {number} regionId
+ * @param {number} id
  * @returns
  */
-export function getRegionalDetails(regionId) {
+export function getRegionalDetails(id) {
   return request({
-    url: "/api/vm-service/region/" + regionId,
+    url: "/api/vm-service/node/vmList/" + id,
+  });
+}
+/**
+ * 获取商圈列表
+ * @returns Promise
+ */
+export function getbusinessdistrict() {
+  return request({
+    url: "/api/vm-service/businessType",
+  });
+}
+/**
+ * 修改商圈列表
+ * @param {*} id
+ * @returns
+ */
+export function postRevise(id, data) {
+  return request({
+    url: `/api/vm-service/node/${id}`,
+    method: "PUT",
+    data,
+  });
+}
+/**
+ * 新增点位
+ * @returns Promise
+ */
+export function postnewlist() {
+  return request({
+    url: "/api/vm-service/node",
+    method: 'POST'
   });
 }

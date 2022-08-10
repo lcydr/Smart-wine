@@ -3,22 +3,40 @@
     <div class="title">
       <el-form :inline="true" :model="formInline" class="demo-form-inline">
         <el-form-item label="设备编号">
-          <Input></Input>
+          <Input ref="inputSearch" @keydown.enter.native="searchVm"></Input>
         </el-form-item>
 
         <el-form-item>
-          <Button category="select" icon="el-icon-search">查询</Button>
+          <Button
+            category="select"
+            icon="el-icon-search"
+            @click.native="searchVm"
+            >查询</Button
+          >
         </el-form-item>
       </el-form>
     </div>
     <div class="main">
       <div class="main-title">
-        <Button category="news" icon="el-icon-circle-plus-outline">新建</Button>
-        <Button category="configuration">批量操作</Button>
+        <Button
+          category="news"
+          icon="el-icon-circle-plus-outline"
+          @click.native="isShowDialog"
+          >新建</Button
+        >
+        <Button category="configuration" @click.native="strategList"
+          >批量操作</Button
+        >
       </div>
       <div class="bable">
-        <Tables :taskInfoList="taskInfoList" :pageIndex="pages"></Tables>
-
+        <!-- 表格 -->
+        <Tables
+          :taskInfoList="taskInfoList"
+          :pageIndex="pages"
+          @getEquipment="getEquipment"
+          ref="Tables"
+        ></Tables>
+        <!-- 分页 -->
         <Pagination
           :totalCount="totalCount"
           :pages="pageIndex"
@@ -27,17 +45,37 @@
           Events="getEquipment"
         ></Pagination>
       </div>
+      <!-- 新增 -->
+      <EquipmentDialog
+        dialogTitle="新增设备"
+        :dialogVisible="dialogVisible"
+        @closeDialog="closeDialog"
+        :isShow="true"
+        ref="EquipmentDialog"
+        @getEquipment="getEquipment"
+      ></EquipmentDialog>
+      <!-- 选择策略 -->
+      <AllStrategyEquipmentDialog
+        dialogTitle="批量选择策略"
+        :dialogVisible="dialogVisibleStrategy"
+        @closeDialog="closeDialogStrategy"
+        :isShow="true"
+        :AddStrategyList="AddStrategyList"
+        :innerCodeList="innerCodeList"
+      ></AllStrategyEquipmentDialog>
     </div>
   </div>
 </template>
 
 <script>
-import { getEquipment } from "@/api";
+import { getEquipment, postPolicy } from "@/api";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import InputSelect from "@/components/InputSelect";
 import Tables from "./components/equipmentTables.vue";
 import Pagination from "@/components/Pagination";
+import EquipmentDialog from "./components/equipmentDialog.vue";
+import AllStrategyEquipmentDialog from "./components/AllStrategyEquipmentDialog.vue";
+
 export default {
   name: "Approvals",
   data() {
@@ -48,20 +86,26 @@ export default {
       totalCount: 0, //总条数
       totalPage: "", //全部页数
       pages: 1,
+      dialogVisible: false,
+      dialogVisibleStrategy: false,
+      AddStrategyList: [],
+      innerCodeList: [],
     };
   },
   components: {
     Button,
     Input,
-    InputSelect,
     Tables,
     Pagination,
+    EquipmentDialog,
+    AllStrategyEquipmentDialog,
   },
   created() {
     this.getEquipment();
   },
   mounted() {},
   methods: {
+    // 获取列表信息
     async getEquipment(pages) {
       this.pages = pages;
       const res = await getEquipment({ pageIndex: pages, pageSize: 10 });
@@ -70,6 +114,65 @@ export default {
       this.totalPage = res.totalPage;
       this.totalCount = Number(res.totalCount);
       this.taskInfoList = res.currentPageRecords;
+    },
+    // 搜索设备
+    async searchVm() {
+      try {
+        if (this.$refs.inputSearch.input.trim().length === 0) {
+          // console.log(123);
+          this.getEquipment();
+          this.$refs.inputSearch.input = "";
+        } else {
+          const value = this.$refs.inputSearch.input;
+          // console.log(this.pageIndex);
+          const res = await getEquipment({
+            // pageIndex: this.pages,
+            pageSize: 10,
+            innerCode: value,
+          });
+          this.$refs.inputSearch.input = "";
+          this.pageIndex = this.pageIndex;
+          this.totalPage = res.totalPage;
+          this.totalCount = Number(res.totalCount);
+          this.taskInfoList = res.currentPageRecords;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    // 新增弹框
+    isShowDialog() {
+      this.$refs.EquipmentDialog.getvmType(this.pageIndex);
+      this.$refs.EquipmentDialog.getNode(this.pageIndex);
+      this.dialogVisible = true;
+    },
+    // 关闭弹窗
+    closeDialog(val) {
+      this.dialogVisible = val;
+    },
+    // 批量操作
+    // strategList() {},
+    // 打开策略弹窗 查询策略
+    async strategList() {
+      //显示选择策略
+      if (this.$refs.Tables.multipleSelection.length !== 0) {
+        const datas = await postPolicy(this.$refs.Tables.multipleSelection);
+        this.AddStrategyList = datas;
+        console.log(datas);
+        // console.log(this.$refs.Tables.multipleSelection);
+
+        this.innerCodeList = this.$refs.Tables.multipleSelection.map((item) => {
+          return item.innerCode;
+        });
+        console.log(this.innerCodeList);
+        this.dialogVisibleStrategy = true;
+      } else {
+        this.$message.error("请选择数据");
+      }
+    },
+    // 关闭选择策略弹窗
+    closeDialogStrategy(val) {
+      this.dialogVisibleStrategy = val;
     },
   },
 };

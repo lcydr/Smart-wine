@@ -4137,7 +4137,11 @@ electron-to-chromium@^1.4.202:
 
 element-china-area-data@^5.0.2:
   version "5.0.2"
+<<<<<<< HEAD
+  resolved "https://registry.yarnpkg.com/element-china-area-data/-/element-china-area-data-5.0.2.tgz#006c26594b8865cb619994063c732562e4583d30"
+=======
   resolved "https://registry.npmjs.org/element-china-area-data/-/element-china-area-data-5.0.2.tgz#006c26594b8865cb619994063c732562e4583d30"
+>>>>>>> b2e966493cd7d80951c29fdec64009f08805e6de
   integrity sha512-vLQuvOKJy/uiX7MRHEk3x/j09hipuIl6DJ/C4XFUG7D7Pj3O47sy+Y6aAArM6k9v8cD9UX6e+yz2S4J+IPnZ8g==
   dependencies:
     china-area-data "^5.0.1"

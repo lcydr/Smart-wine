@@ -24,7 +24,9 @@
           @click.native="isShowDialog"
           >新建</Button
         >
-        <Button category="configuration">批量操作</Button>
+        <Button category="configuration" @click.native="strategList"
+          >批量操作</Button
+        >
       </div>
       <div class="bable">
         <!-- 表格 -->
@@ -32,6 +34,7 @@
           :taskInfoList="taskInfoList"
           :pageIndex="pages"
           @getEquipment="getEquipment"
+          ref="Tables"
         ></Tables>
         <!-- 分页 -->
         <Pagination
@@ -42,6 +45,7 @@
           Events="getEquipment"
         ></Pagination>
       </div>
+      <!-- 新增 -->
       <EquipmentDialog
         dialogTitle="新增设备"
         :dialogVisible="dialogVisible"
@@ -50,17 +54,28 @@
         ref="EquipmentDialog"
         @getEquipment="getEquipment"
       ></EquipmentDialog>
+      <!-- 选择策略 -->
+      <AllStrategyEquipmentDialog
+        dialogTitle="批量选择策略"
+        :dialogVisible="dialogVisibleStrategy"
+        @closeDialog="closeDialogStrategy"
+        :isShow="true"
+        :AddStrategyList="AddStrategyList"
+        :innerCodeList="innerCodeList"
+      ></AllStrategyEquipmentDialog>
     </div>
   </div>
 </template>
 
 <script>
-import { getEquipment } from "@/api";
+import { getEquipment, postPolicy } from "@/api";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Tables from "./components/equipmentTables.vue";
 import Pagination from "@/components/Pagination";
 import EquipmentDialog from "./components/equipmentDialog.vue";
+import AllStrategyEquipmentDialog from "./components/AllStrategyEquipmentDialog.vue";
+
 export default {
   name: "Approvals",
   data() {
@@ -72,6 +87,9 @@ export default {
       totalPage: "", //全部页数
       pages: 1,
       dialogVisible: false,
+      dialogVisibleStrategy: false,
+      AddStrategyList: [],
+      innerCodeList: [],
     };
   },
   components: {
@@ -80,6 +98,7 @@ export default {
     Tables,
     Pagination,
     EquipmentDialog,
+    AllStrategyEquipmentDialog,
   },
   created() {
     this.getEquipment();
@@ -130,6 +149,30 @@ export default {
     // 关闭弹窗
     closeDialog(val) {
       this.dialogVisible = val;
+    },
+    // 批量操作
+    // strategList() {},
+    // 打开策略弹窗 查询策略
+    async strategList() {
+      //显示选择策略
+      if (this.$refs.Tables.multipleSelection.length !== 0) {
+        const datas = await postPolicy(this.$refs.Tables.multipleSelection);
+        this.AddStrategyList = datas;
+        console.log(datas);
+        // console.log(this.$refs.Tables.multipleSelection);
+
+        this.innerCodeList = this.$refs.Tables.multipleSelection.map((item) => {
+          return item.innerCode;
+        });
+        console.log(this.innerCodeList);
+        this.dialogVisibleStrategy = true;
+      } else {
+        this.$message.error("请选择数据");
+      }
+    },
+    // 关闭选择策略弹窗
+    closeDialogStrategy(val) {
+      this.dialogVisibleStrategy = val;
     },
   },
 };

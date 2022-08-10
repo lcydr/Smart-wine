@@ -16,14 +16,8 @@
   "dependencies": {
     "axios": "0.18.1",
     "core-js": "^3.24.1",
-<<<<<<< HEAD
-<<<<<<< HEAD
-    "element-china-area-data": "^5.0.2",
-=======
     "dayjs": "^1.11.4",
->>>>>>> feature/equipment
-=======
->>>>>>> 1f87666e18161b243651fc21f43c2c9235226584
+    "element-china-area-data": "^5.0.2",
     "element-ui": "2.13.2",
     "js-cookie": "2.2.0",
     "less": "^4.1.3",

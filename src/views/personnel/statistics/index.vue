@@ -196,8 +196,7 @@ export default {
       let hh = 23;
       let mf = 59;
       let ss = 59;
-      this.gettime =
-        yy + "-0" + mm + "-0" + dd + " " + hh + ":" + mf + ":" + ss;
+      this.gettime = yy + "-0" + mm + "-" + dd + " " + hh + ":" + mf + ":" + ss;
       // console.log(this.gettime);
       // 周
       let yy3 = new Date().getFullYear();
@@ -207,7 +206,7 @@ export default {
       let mf3 = 0;
       let ss3 = 0;
       this.gettime3 =
-        yy3 + "-0" + mm3 + "-0" + dd3 + " 0" + hh3 + ":0" + mf3 + ":0" + ss3;
+        yy3 + "-0" + mm3 + "-" + dd3 + " 0" + hh3 + ":0" + mf3 + ":0" + ss3;
       // console.log(this.gettime3);
       const res = await taskReportInfo({
         start: this.gettime3,
